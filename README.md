@@ -18,6 +18,6 @@ pip install transformers torch
 # Quickstart
 Для запуска генерации текста:
 ```
-python GenAi-1-15.py
+python GenAi-1-15.py 30 50
 ```
 После запуска введите текстовый промпт при запросе "enter prompt", и программа сгенерирует продолжение текста длиной 30-50 токенов.
