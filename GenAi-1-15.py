@@ -1,56 +1,113 @@
 from transformers import pipeline
+import argparse
 
-
-def main():
-    """Генерация текста с использованием модели GPT-2.
+def generate_text(promt, min_lenght, max_lenght):
+    """
+    Генерирует текст на основе промпта с использованием модели GPT-2.
     
-    Основная функция для взаимодействия с пользователем и генерации
-    текста на основе введенного промпта с использованием модели GPT-2.
-
+    Использует Hugging Face Transformers pipeline для генерации текста с заданными
+    параметрами длины. Функция обрабатывает возможные ошибки генерации.
+    
     Parameters
     ----------
-    None
-        Функция не принимает параметры, все данные получает от пользователя.
-
+    prompt : str
+        Входной текст (промпт), на основе которого генерируется продолжение
+    min_length : int
+        Минимальная длина генерируемого текста в токенах
+    max_length : int
+        Максимальная длина генерируемого текста в токенах
+        
     Returns
     -------
-    None
-        Функция выводит результат в консоль, не возвращает значений.
-
+    list or None
+        Список с результатами генерации текста, где каждый элемент содержит:
+        - 'generated_text': сгенерированный текст
+        Возвращает None в случае возникновения ошибки
+        
     Raises
     ------
-    Модель GPT-2 является трансформерной языковой моделью, разработанной OpenAI.
-    Генерация текста происходит авторегрессивно - каждый следующий токен
-    предсказывается на основе предыдущих.
-
-    Для работы требуется установленная библиотека transformers
-    Examples
-    --------
-    >>> # Запуск из командной строки:
-    >>> # python GenAi-1-15.py
-    >>> # enter prompt: 'Ввести промт'
-    >>> # answer: 'Придсказание токенов на основе предыдущих'
+    Exception
+        Любые исключения, возникающие в процессе генерации текста, 
+        перехватываются и выводятся в консоль
     """
-    # Инициализация пайплайна для генерации текста с моделью GPT-2
-    generator = pipeline(
-        "text-generation",  # Тип задачи: генерация текста
-        model="gpt2"        # Используемая предобученная модель
-    )
+    try:
+        generator = pipeline(
+            "text-generation",  
+            model="gpt2"        
+        )
+        result = generator(
+            promt,           
+            min_length=min_lenght,    
+            max_length=max_lenght,
+            min_new_tokens=min_lenght,
+            max_new_tokens=max_lenght     
+        )
+        return result
+    
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
+        return None
 
-    # Получение входного текста от пользователя
-    prompt = input("enter prompt")
+def check_result_lenght(result, min_lenght, max_lenght):
+    """
+    Проверяет длину сгенерированного текста.
+    
+    Parameters
+    ----------
+    result : list
+        Результат генерации текста
+        
+    Returns
+    -------
+    bool
+        True если длина соответствует требованиям, False если нет
+    """
+    try:
+        if result is None or len(result) == 0:
+            print("Результат пустой")
+            return False
+            
+        generated_text = result[0]["generated_text"]
+        text_length = len(generated_text.split())
+        
+        print(f"Длина текста: {text_length} слов")
+        
+        if min_lenght <= text_length <= max_lenght:
+            print(f"Длина соответствует требованиям ({min_lenght}-{max_lenght} слов)")
+            return True
+        else:
+            print(f"Длина НЕ соответствует требованиям ({min_lenght}-{max_lenght} слов)")
+            return False
+            
+    except Exception as e:
+        print(f"Ошибка при проверке длины: {e}")
+        return False
 
-    # Генерация текста на основе введенного промпта
-    result = generator(
-        prompt,           # Входной текст для продолжения генерации
-        min_length=30,    # Минимальная длина генерируемого текста в токенах
-        max_length=50     # Максимальная длина генерируемого текста в токенах
-    )
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("min_lenght") 
+    parser.add_argument("max_lenght")
+    args = parser.parse_args()
 
-    # Вывод сгенерированного текста (первый результат из списка)
-    print("answer", result[0]["generated_text"])
+    min_lenght = int(args.min_lenght)
+    max_lenght = int(args.max_lenght)
 
+    for i in range(1, 4):
+        print(i, "итерация:\n")
+        try:
+            prompt = input("enter prompt: ")
+            result = generate_text(prompt, min_lenght, max_lenght)
+
+            if result is not None:
+                print("answer", result[0]["generated_text"])
+            else:
+                print("Не удалось сгенерировать текст")
+        except KeyboardInterrupt:
+            print("\nПрогрмма прервана")
+        except Exception as e:
+            print(f"Ошибка: {e}")
+
+        print("\nДлина в интервале?:", check_result_lenght(result, min_lenght, max_lenght))
 
 if __name__ == '__main__':
-    # Точка входа в программу при запуске скрипта напрямую
     main()
