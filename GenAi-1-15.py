@@ -1,4 +1,4 @@
-from transformers import pipeline
+from transformers import pipeline, AutoTokenizer
 import argparse
 
 def generate_text(generator, prompt, min_length, max_length):
@@ -44,7 +44,7 @@ def generate_text(generator, prompt, min_length, max_length):
         print(f"Произошла ошибка: {e}")
         return None
 
-def check_result_length(result, min_length, max_length):
+def check_result_length(result, tokenizer, min_length, max_length):
     """
     Проверяет длину сгенерированного текста.
     
@@ -62,19 +62,20 @@ def check_result_length(result, min_length, max_length):
         if result is None or len(result) == 0:
             print("Результат пустой")
             return False
-            
+
         generated_text = result[0]["generated_text"]
-        text_length = len(generated_text.split())
-        
-        print(f"Длина текста: {text_length} слов")
-        
-        if min_length <= text_length <= max_length:
-            print(f"Длина соответствует требованиям ({min_length}-{max_length} слов)")
+        tokenized = tokenizer.encode(generated_text, add_special_tokens=False)
+        token_length = len(tokenized)
+
+        print(f"Длина текста: {token_length} токенов")
+
+        if min_length <= token_length <= max_length:
+            print(f"Длина соответствует требованиям ({min_length}-{max_length} токенов)")
             return True
         else:
-            print(f"Длина НЕ соответствует требованиям ({min_length}-{max_length} слов)")
+            print(f"Длина НЕ соответствует требованиям ({min_length}-{max_length} токенов)")
             return False
-            
+
     except Exception as e:
         print(f"Ошибка при проверке длины: {e}")
         return False
@@ -89,7 +90,8 @@ def main():
     max_length = int(args.max_length)
 
     generator = pipeline("text-generation", model="gpt2")
-    
+    tokenizer = AutoTokenizer.from_pretrained("gpt2")
+
     for i in range(1, 4):
         print(i, "итерация:\n")
         try:
@@ -105,7 +107,7 @@ def main():
         except Exception as e:
             print(f"Ошибка: {e}")
 
-        print("\nДлина в интервале?:", check_result_length(result, min_length, max_length))
+        print("\nДлина в интервале?:", check_result_length(result, tokenizer, min_length, max_length))
 
 if __name__ == '__main__':
     main()
