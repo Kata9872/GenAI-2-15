@@ -1,7 +1,7 @@
 from transformers import pipeline
 import argparse
 
-def generate_text(prompt, min_length, max_length):
+def generate_text(generator, prompt, min_length, max_length):
     """
     Генерирует текст на основе промпта с использованием модели GPT-2.
     
@@ -31,10 +31,6 @@ def generate_text(prompt, min_length, max_length):
         перехватываются и выводятся в консоль
     """
     try:
-        generator = pipeline(
-            "text-generation",  
-            model="gpt2"        
-        )
         result = generator(
             prompt,           
             min_length=min_length,    
@@ -92,11 +88,13 @@ def main():
     min_length = int(args.min_length)
     max_length = int(args.max_length)
 
+    generator = pipeline("text-generation", model="gpt2")
+    
     for i in range(1, 4):
         print(i, "итерация:\n")
         try:
             prompt = input("enter prompt: ")
-            result = generate_text(prompt, min_length, max_length)
+            result = generate_text(generator, prompt, min_length, max_length)
 
             if result is not None:
                 print("answer", result[0]["generated_text"])
@@ -111,3 +109,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
