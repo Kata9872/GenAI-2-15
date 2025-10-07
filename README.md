@@ -1,23 +1,50 @@
+# Генерация текста с ограничением повторов
+Этот скрипт сравнивает генерацию текста моделью GPT-2 в двух режимах:
+##### Baseline (без ограничения): 
+обычная генерация (может повторяться)
+##### С ограничением: 
+с параметром no_repeat_ngram_size=2, запрещающим повторение любых пар слов
+###### Цель — доказать, что ограничение снижает количество повторяющихся триграмм как минимум на 30%.
 
-# About
+### Как запустить
+Установите зависимости:
+```bash
+pip install -r requirements.txt
+```
+### Запустите скрипт с желаемой длиной генерации (в токенах):
+```bash
+python GenAI-2-15.py 30 50
+```
+### Введите текстовый промпт при запросе enter prompt:
+###### Пример промпта:
+```text
+I love chocolate. I love chocolate. I love
+```
+###### Программа выведет:
+```text
+Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation.
+Без ограничения: I love chocolate. I love chocolate. I love chocolate.
 
-Код решения задачи GenAi-1-15 выполняет следующее:
-* Инициализацию пайплайна для генерации текста с использованием модели GPT-2
-* Получение текстового промпта от пользователя через стандартный ввод
-* Генерацию продолжения текста на основе введенного промпта
-* Вывод сгенерированного текста в консоль с заданными параметрами длины
-* Предсказание следующих токенов на основе предыдущего контекста
+So I know what you're thinking. Chocolate is for you.
 
-# Installation
-```
-git clone https://github.com/O-Osipov/NSUTasks-GenAI-1-15.git
-cd NSUTasks-GenAI-1-15
-pip install transformers torch
+So, I'm gonna try my best to keep you in line with the way I want to tell you about me.
+
+I'm gonna try to
+Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation.
+С ограничением: I love chocolate. I love chocolate. I love the way it smells. It's not really chocolate but it's what I'm looking for. The way I see it is that chocolate is just what you want. In that sense, it makes me happy."
+
+The two went on to form
+
+Повторяющихся триграмм — baseline: 7
+Повторяющихся триграмм — с ограничением: 3
+Снижение повторов: 57.1%
+Условие выполнено. Снижение ≥30%
 ```
 
-# Quickstart
-Для запуска генерации текста:
+#### Требования
+Python 3.7+
+#### Библиотеки из requirements.txt:
+```text
+transformers>=4.30
+torch
 ```
-python GenAi-1-15.py 30 50
-```
-После запуска введите текстовый промпт при запросе "enter prompt", и программа сгенерирует продолжение текста длиной 30-50 токенов.
